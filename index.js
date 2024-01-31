@@ -1,29 +1,29 @@
-// @ts-check
-// client usage example
-import { createHooks } from './createHooks.js'
+import { createHooks, createInstance, befB, aftA, aftB } from './hooks_chaining/index.js'
+import { decorate, decoratorA, decoratorB } from './decorative/index.js'
 
-// create hook functions
-const createSomeing = (meta) => {
-  console.log('createSomeing');
-  const instance = { name: 'classA' };
-  meta.instance = instance;
-};
-const befB = () => console.log('bef B');
-const aftA = () => console.log('aft A');
-const aftB = () => console.log('aft B');
-
-// main API object
 const api = {
   methodA: createHooks(({ instance }, arg1, arg2) => {
-    console.log('methodA main process...', [arg1, arg2]);
-    console.log(instance.name);
-    return 'valA';
+    console.log('methodA process...', [arg1, arg2])
+    console.log(instance.name)
+    return 'valA'
   })
-    .onBefore(createSomeing)
+    .onBefore(createInstance)
     .onBefore(befB)
     .onAfter(aftA)
     .onAfter(aftB),
-};
+  methodB: decorate(
+    decoratorA,
+    decoratorB,
+    ({ instance }, arg1, arg2) => {
+      console.log('methodB process...', [arg1, arg2])
+      console.log(instance.name)
+      return 'valB'
+    }
+  )
+}
 
-const result = api.methodA('arg1', 'arg2');
-console.log({ result })
+console.log('invoke methodA by hooks:')
+console.log(api.methodA('arg1', 'arg2'))
+
+console.log('\ninvoke methodB by decorators:')
+console.log(api.methodB('arg1', 'arg2'))
